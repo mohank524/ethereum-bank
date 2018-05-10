@@ -1,7 +1,7 @@
 const routes = require('next-routes')();
 
 routes
-.add('/bank/send', '/bank/send')
+.add('/bank/new', '/bank/new')
 .add('/bank/receive', '/bank/receive');
 
 module.exports = routes;
