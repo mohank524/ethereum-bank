@@ -1,5 +1,5 @@
 import React from 'react';
-import { Header, Button } from 'semantic-ui-react'
+import { Header, Button } from 'semantic-ui-react';
 import { Link } from "../routes";
 
 

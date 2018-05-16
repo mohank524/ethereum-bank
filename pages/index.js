@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { Card, Button, Header, Divider, Segment  } from  'semantic-ui-react';
+import { Button, Divider, Segment  } from  'semantic-ui-react';
 import factory from '../ethereum/factory';
 import Layout from '../components/Layout';
 import { Link } from "../routes";
@@ -14,7 +14,7 @@ class BankIndex extends Component{
                 <h2>Bank Loan System</h2>
                 <Divider section /> 
                 <div>
-                    <Link route='/bank/send/'>
+                    <Link route='/bank/show/'>
                         <a>
                             <Button content='Send Money' primary/>
                         </a>
