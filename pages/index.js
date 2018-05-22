@@ -13,12 +13,11 @@ class BankIndex extends Component{
     }
 
     renderbanks() {
-        console.log(this.props.bank);
         const item = this.props.bank.map(address => {
             return {
                 header: address,
                 description:(
-                    <Link route={`/bank/loan/new`}>
+                    <Link route={`/bank/${address}/loan/new`}>
                     <a>View Bank</a>
                     </Link>
                 ),

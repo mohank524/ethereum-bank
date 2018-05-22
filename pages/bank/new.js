@@ -28,7 +28,7 @@ class BankNew extends Component {
             await factory.methods.createBank(
                 address)
                 .send({from:accounts[0]});
-            Router.pushRoute(`/bank/final`);
+            Router.pushRoute(`/`);
         } catch (err) {
         this.setState({errorMessage: err.message});
         }

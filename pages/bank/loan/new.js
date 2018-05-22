@@ -45,7 +45,7 @@ class BankNew extends Component {
         this.setState({loading: true, errorMessage: ''})
         try {
             const accounts = await web3.eth.getAccounts();                    
-            const a = await bank.methods.submitLoan(
+            await bank.methods.submitLoan(
                 _addressOfProperty,
                 _purchasePrice,
                 _term,
@@ -59,7 +59,7 @@ class BankNew extends Component {
                 _mortgageHolder,
                 _insurer,
                 _irs).send({from:accounts[0], gas:1000000});
-            Router.pushRoute(`/bank/loan/show`);
+            Router.pushRoute(`/bank/${this.props.address}/loan/show`);
         } catch (err) {
         this.setState({errorMessage: err.message});
         }
