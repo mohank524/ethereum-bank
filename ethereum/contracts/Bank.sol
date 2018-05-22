@@ -85,7 +85,7 @@ contract Bank{
       _;
    }
     
-   function deposit(address receiver, uint amount) public returns(uint) {
+   function deposit(address receiver, uint amount) public view returns(uint) {
         if (balances[msg.sender] < amount) return;
         balances[msg.sender] -= amount;
         balances[receiver] += amount;
@@ -93,7 +93,7 @@ contract Bank{
     }
 
 
-    function getBalance(address receiver) public constant returns(uint){
+    function getBalance(address receiver) public view returns(uint){
         return balances[receiver];
     }
     
@@ -130,7 +130,7 @@ contract Bank{
     }
     
 
-    function getLoanData() public constant returns (
+    function getLoanData() public view returns (
             string _addressOfProperty,
             uint _purchasePrice,
             uint _term,
