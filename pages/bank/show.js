@@ -4,36 +4,50 @@ import Layout from '../../components/Layout';
 import { Link } from "../../routes";
 import web3 from '../../ethereum/web3';
 import BigNumber from "bignumber.js";
+import Bank from '../../ethereum/bank';
+import { Button, Checkbox, Icon, Table } from 'semantic-ui-react'
+
 
 class BankShow extends Component{
     
     state = {
         accounts: '',
-        balance: ''
+        balance: '',
+        details:'',
+        loanId:''
     };
-    
-    componentDidMount() {
-        const accounts = web3.eth.getAccounts();
-        const dataSet  = Promise.resolve(accounts);
-        dataSet.then((values) => { 
-            this.setState({ accounts: values});
-            const balance = web3.eth.getBalance(values[0]);
-            const data  = Promise.resolve(balance);
-            data.then((values) => { this.setState({ balance: values}) });
-        }); 
+
+    static async getInitialProps(props) {
+        const bank = Bank(props.query.address);
+        const accounts = web3.eth.getAccounts();        
+        const summary = await bank.methods.getBalance(accounts[0]).call();
+        return {summary};
     }
-    
+ 
     render() {
         return (
                 <Layout>
                 <Message
-                    header='Bank Loan View'
-                    content='You can have a look into your bank information'
+                    header=' View'
+                    content='You can have a look into your  information'
                 />
-                    <h5>Account address : {this.state.accounts}</h5>
-                    <h5>Account balance :  {this.state.balance}</h5>
-                </Layout>
+                    <Table celled compact definition>
+                    <Table.Header fullWidth>
+                    <Table.Row>
+                        <Table.HeaderCell>Balance</Table.HeaderCell>
+                    </Table.Row>
+                    </Table.Header>
 
+                    <Table.Body>
+                    <Table.Row>
+                        {/* <Table.Cell>{this.state.balance}</Table.Cell> */}
+                        <Table.Cell>No</Table.Cell>
+                        <Table.Cell><Button size='small'>Approve</Button></Table.Cell>
+                    </Table.Row>
+                    </Table.Body>
+                    
+                </Table>
+                </Layout>
         );
     }
 }

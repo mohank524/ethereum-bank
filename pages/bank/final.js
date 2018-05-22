@@ -12,23 +12,22 @@ class BankNew extends Component {
     
     state = {
         amount: '',
-        address: '',
-        date: '',
+        Address: '',
         errorMessage:''
     };
-
-
+    static async getInitialProps(props) {
+        const { address } = props.query;
+        return { address};
+    }
     onSubmit = async event => {
-        event.preventDefault();
-
-        const { address } = this.state;
-        this.setState({loading: true});        
+        const bank = Bank(this.props.address);
+        const {  Address, amount } = this.state;
+        this.setState({loading: true, errorMessage: ''});        
         try {
-            const accounts = await web3.eth.getAccounts();
-            await factory.methods.createBank(
-                address)
-                .send({from:accounts[0]});
-            Router.pushRoute(`/bank/final`);
+            const accounts = await web3.eth.getAccounts();        
+            await bank.methods.deposit(Address, amount)
+                .send({ from: accounts[0], gas: 1000000 });
+            Router.pushRoute(`/bank/show`);
         } catch (err) {
         this.setState({errorMessage: err.message});
         }
@@ -53,14 +52,14 @@ class BankNew extends Component {
                         </Form.Field>  
                         <Form.Field>  
                         <label>
-                            Address
+                            Add
                         </label>    
-                        <Input value={this.state.address}
+                        <Input value={this.state.Address}
                         onChange= {event =>
-                            this.setState({ address:  event.target.value })}
+                            this.setState({ Address:  event.target.value })}
                         />
                         </Form.Field> 
-                        <Message error header="Oops" content={this.state.errorMessage} />           
+                        <Message error header="Oops" content={this.state.errorMessage} />
                         <Button primary loading={this.state.loading } >Create </Button> 
                     </Form>      
                     </Segment>

@@ -7,7 +7,7 @@ if (typeof window !== 'undefined' && typeof window.web3 !== 'undefined') {
 }
 else {
     const provider = new Web3.providers.HttpProvider(
-        "https://rinkeby.infura.io/G7F8davKaQdY2mFMz4Mn"
+        "https://rinkeby.infura.io/vTwdTiIlPwAbLIRKTMYU"
     );
     web3 = new Web3(provider);
 }

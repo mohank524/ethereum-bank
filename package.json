@@ -13,7 +13,7 @@
     "fs-extra": "^5.0.0",
     "ganache-cli": "^6.1.0",
     "material-ui": "^0.20.0",
-    "mocha": "^5.1.1",
+    "mocha": "^5.2.0",
     "next": "^4.1.4",
     "next-routes": "^1.4.1",
     "rc-datepicker": "^5.0.13",
@@ -26,7 +26,7 @@
     "semantic-ui-calendar": "0.0.8",
     "semantic-ui-calendar-react": "^0.1.5",
     "semantic-ui-react": "^0.79.1",
-    "solc": "^0.4.23",
+    "solc": "^0.4.24",
     "truffle-hdwallet-provider": "0.0.3",
     "web3": "^1.0.0-beta.26"
   },

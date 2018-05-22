@@ -1,220 +1,168 @@
-pragma solidity ^0.4.4;
+pragma solidity ^0.4.17;
+
+
+contract BankFactory {
+    address[] public deployedBank;
+
+    function createBank(uint minimum) public {
+        address newBank = new Bank(minimum, msg.sender);
+        deployedBank.push(newBank);
+    }
+
+    function getDeployedBank() public view returns (address[]) {
+        return deployedBank;
+    }
+}
+
 
 contract Bank{
 
-    address public master;
-    enum requestState {
-        WAITING,
-        ACCEPTED,
-        REPAID
+    uint public minimumContribution;
+    address public manager;
+
+    function Bank (uint minimum, address creator) public {
+        manager = creator;
+        minimumContribution = minimum;
+        loan.status = STATUS_INITIATED;
+        balances[msg.sender] = 100000000;
     }
 
-    struct Proposal {
-        address lender;
-        uint loanId;
-        requestState state;
-        uint rate;
-        uint amount;
+    
+    event LienTrasferred (address _owner);
+    event LoanStatus (int _status);
+   
+    int constant STATUS_INITIATED = 0;
+    int constant STATUS_SUBMITTED = 1;
+    int constant STATUS_APPROVED  = 2;
+    int constant STATUS_REJECTED  = 3;
+    
+    
+    struct Property {
+      string  addressOfProperty;
+      uint purchasePrice;
+      address owner;
+    }
+
+    struct LoanTerms{
+      uint term;
+      uint interest;
+      uint loanAmount;
+      uint annualTax;
+      uint annualInsurance;
+    }
+
+    struct MonthlyPayment{
+        uint pi;
+        uint tax;
+        uint insurance;
     }
     
-    enum loanState {
-        ACCEPTING,
-        LOCKED,
-        SUCCESSFUL,
-        FAILED
-    }
-    
+
     struct Loan {
-        address borrower;
-        loanState state;
-        uint dueDate;
-        uint amount;
-        uint requestCount;
-        uint collected;
-        uint startDate;
-        mapping (uint=>uint) proposal;
+      LoanTerms loanTerms;
+      Property property;
+      MonthlyPayment monthlyPayment;
+      ActorAccounts actorAccounts;
+      int status; 
     }
-    Loan[] public loanList;
-    Proposal[] public proposalList;
+    
+    struct ActorAccounts {
+      address mortgageHolder;
+      address insurer;
+      address irs;
+    }
+    
+    Loan public loan;
+    LoanTerms public loanTerms;
+    Property public property;
+    MonthlyPayment public monthlyPayment;
+    ActorAccounts public actorAccounts;
+    
+   mapping (address => uint) public balances;
+   
+    modifier bankOnly {
+      require(msg.sender != loan.actorAccounts.mortgageHolder);
+      _;
+   }
+    
+   function deposit(address receiver, uint amount) public returns(uint) {
+        if (balances[msg.sender] < amount) return;
+        balances[msg.sender] -= amount;
+        balances[receiver] += amount;
+        return balances[receiver];
+    }
 
-    mapping (address=>uint[]) public loanMap;
-    mapping (address=>uint[]) public lendMap;
-    
-    function Bank() {
-        master = msg.sender;
+
+    function getBalance(address receiver) public constant returns(uint){
+        return balances[receiver];
     }
     
-    function activeLoad(address borrower) public returns (bool){
-        uint validLoad = loanMap[borrower].length;
-        if (validLoad == 0 ) return;
-        if (loanList[validLoad-1].state == loanState.ACCEPTING)
-            return true;
-        if (loanList[validLoad-1].state == loanState.LOCKED)
-            return true;
-        return false;    
+
+    function submitLoan(
+            string _addressOfProperty,
+            uint _purchasePrice,
+            uint _term,
+            uint _interest,
+            uint _loanAmount,
+            uint _annualTax,
+            uint _annualInsurance, 
+            uint _monthlyPi,
+            uint _monthlyTax,
+            uint _monthlyInsurance,
+            address _mortgageHolder,
+            address _insurer,
+            address _irs
+    )public {
+        loan.property.addressOfProperty = _addressOfProperty;
+        loan.property.purchasePrice = _purchasePrice;
+        loan.loanTerms.term=_term;
+        loan.loanTerms.interest=_interest;
+        loan.loanTerms.loanAmount=_loanAmount;
+        loan.loanTerms.annualTax=_annualTax;
+        loan.loanTerms.annualInsurance=_annualInsurance;
+        loan.monthlyPayment.pi=_monthlyPi;
+        loan.monthlyPayment.tax=_monthlyTax;
+        loan.monthlyPayment.insurance=_monthlyInsurance;
+        loan.actorAccounts.mortgageHolder = _mortgageHolder;
+        loan.actorAccounts.insurer = _insurer;
+        loan.actorAccounts.irs = _irs;
+        loan.status = STATUS_SUBMITTED;
     }
     
-    function newloan(uint amount, uint dueDate) public {
-        if (activeLoad(msg.sender)) return;
-        uint time = block.timestamp;
-        loanList.push(Loan(msg.sender, loanState.ACCEPTING, dueDate, amount, 0,0, time));
-        loanMap[msg.sender].push(loanList.length - 1);
+
+    function getLoanData() public constant returns (
+            string _addressOfProperty,
+            uint _purchasePrice,
+            uint _term,
+            uint _interest,
+            uint _loanAmount,
+            uint _annualTax,
+            uint _annualInsurance,
+            int _status,
+            uint _monthlyPi,
+            uint _monthlyTax,
+            uint _monthlyInsurance)
+    {
+        _addressOfProperty = loan.property.addressOfProperty;
+        _purchasePrice=loan.property.purchasePrice;
+        _term=loan.loanTerms.term;
+        _interest=loan.loanTerms.interest;
+        _loanAmount=loan.loanTerms.loanAmount;
+        _annualTax=loan.loanTerms.annualTax;
+        _annualInsurance=loan.loanTerms.annualInsurance;
+        _monthlyPi=loan.monthlyPayment.pi;
+        _monthlyTax=loan.monthlyPayment.tax;
+        _monthlyInsurance=loan.monthlyPayment.insurance;
+        _status = loan.status;
     }
     
-    function newProposal(uint Id, uint rate) payable {
-        if (loanList[Id].borrower == 0 || loanList[Id].state != loanState.ACCEPTING)
-            return;
-        proposalList.push(Proposal(msg.sender, Id, requestState.WAITING, rate, msg.value ));
-        lendMap[msg.sender].push(proposalList.length - 1);
-        loanList[Id].requestCount++;
-        loanList[Id].proposal[loanList[Id].requestCount - 1] = proposalList.length - 1;
-    }
-    
-    function getActiveLoanId(address borrower) public constant returns (uint){
-        uint numLoan = loanMap[borrower].length;
-        if (numLoan == 0 )
-            return;
-        uint lastLoadId = loanMap[borrower][numLoan - 1];
-        if (loanList[lastLoadId].state != loanState.ACCEPTING)
-            return (2**64-1);
-        return lastLoadId;    
-    }
-    
-    function revokeProposal(uint id){
-        uint pId = lendMap[msg.sender][id];
-        if (proposalList[pId].state != requestState.WAITING){
-            return;
-        } 
-        uint Lid = proposalList[pId].loanId;
-        if(loanList[Lid].state == loanState.ACCEPTING){
-            proposalList[pId].state = requestState.REPAID;
-            msg.sender.transfer(proposalList[pId].amount);
-        }
-        else{
-            return;
-        }
-    }
-    
-    function lockLoan(uint id) public {
-        if ( loanList[id].state == loanState.ACCEPTING ) {
-            loanList[id].state = loanState.LOCKED;
-            for (uint i = 0; i < loanList[id].requestCount; i++) {
-                uint num = loanList[id].proposal[i];
-                if (proposalList[num].state == requestState.ACCEPTED) {
-                    msg.sender.transfer(proposalList[num].amount);
-                }else {
-                    proposalList[num].state == requestState.REPAID;
-                    proposalList[num].lender.transfer(proposalList[num].amount);
-                }
-            }
-        }
-        else{
-            return;
+
+    function approveRejectLoan(int _status) public bankOnly {
+
+        loan.status = _status ;
+        if(_status == STATUS_APPROVED)
+        {
+            loan.property.owner  = msg.sender;
         }
     }
-    
-    function repayValue(uint id) public constant returns (uint){
-        if (loanList[id].state == loanState.LOCKED){
-            uint date = loanList[id].startDate;
-            uint totalamount = 0;
-            for (uint i = 0; i < loanList[id].requestCount; i++){
-                uint num = loanList[i].proposal[i];
-                if (proposalList[num].state == requestState.ACCEPTED){
-                    uint ori = proposalList[num].amount;
-                    uint rate = proposalList[num].rate;
-                    uint nows = block.timestamp;
-                    uint interest = (ori*rate*(nows-date)) / (365*24*60*60*100);
-                    totalamount += interest;
-                    totalamount += ori;
-                }
-                return totalamount;
-            }
-        }
-        else{
-            return (2**64-1);
-        }
-    }
-    
-    function repayLoan(uint id) payable {
-        uint nows = block.timestamp;
-        uint toPaid = repayValue(id);
-        uint time = loanList[id].startDate;
-        uint paid = msg.value;
-        
-        if (paid >= toPaid){
-            uint remained = paid - toPaid;
-            loanList[id].state = loanState.SUCCESSFUL;
-            for ( uint i = 0; i < loanList[id].requestCount; i++){
-                uint num = loanList[id].proposal[i];
-                if (proposalList[num].state == requestState.ACCEPTED){
-                    uint ori = proposalList[num].amount;
-                    uint rate = proposalList[num].rate;
-                    uint interest = (ori * rate * (nows* time)) / (365*24*60*60*100);
-                    uint totalamount = interest + ori;
-                    proposalList[num].lender.transfer(totalamount);
-                    proposalList[num].state = requestState.REPAID;
-                }
-            }
-            msg.sender.transfer(remained);
-        }
-        msg.sender.transfer(paid);
-    }
-    
-    function acceptPorposal(uint Id){
-        uint lId = getActiveLoanId(msg.sender);
-        if(lId == (2**64 -1)){
-            return;
-        }
-        
-        Proposal pobj = proposalList[Id];
-        if (pobj.state != requestState.WAITING){
-            return;
-        }
-        
-        Loan lobj = loanList[lId];
-        if (lobj.state != loanState.ACCEPTING){
-            return;
-        }
-        
-        if (lobj.collected + pobj.amount <= lobj.amount){
-            loanList[lId].collected += pobj.amount;
-            proposalList[Id].state = requestState.ACCEPTED;
-        }
-    }
-    
-    function totalProposal(address _address) constant returns (uint) {
-        return lendMap[_address].length;
-    }
-    
-    function getProposalAddressInfo(address _address, uint position) constant returns( address, uint, requestState, uint, uint, uint, uint) {
-        Proposal pobj = proposalList[lendMap[_address][position]];
-        return (pobj.lender, pobj.loanId, pobj.state, pobj.rate, pobj.amount, loanList[pobj.loanId].amount, loanList[pobj.loanId].dueDate);
-    }
-    
-    function totalLoan(address _address) constant returns (uint) {
-        return loanMap[_address].length;
-    }
-    
-    function lastLoanStatus(address _address) constant returns (loanState) {
-        uint loanLength = loanMap[_address].length;
-        if (loanLength == 0){
-            return loanState.SUCCESSFUL;
-        }
-        return loanList[loanMap[_address][loanLength - 1]].state;
-    }
-    
-    function lastLoanDetails(address _address) constant returns(loanState, uint, uint, uint, uint ) {
-        uint loanLength = lendMap[_address].length;
-        Loan lobj = loanList[lendMap[_address][loanLength - 1]];
-        return (lobj.state, lobj.dueDate, lobj.amount, lobj.requestCount, lobj.collected);
-    }
-    
-    function getProposalLoanIddetails(uint Id, uint num ) constant returns (requestState, uint, uint, uint, address) {
-        Proposal pObj = proposalList[loanList[Id].proposal[num]];
-        return (pObj.state, pObj.loanId, pObj.rate, loanList[Id].proposal[num], pObj.lender);
-    }
-    
-    function totalLoans() constant returns (uint) {
-        return loanList.length;
-    }
-}    
+}

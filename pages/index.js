@@ -1,34 +1,62 @@
 import React, {Component} from 'react';
-import { Button, Divider, Segment  } from  'semantic-ui-react';
+import { Button, Divider, Card  } from  'semantic-ui-react';
 import factory from '../ethereum/factory';
 import Layout from '../components/Layout';
 import { Link } from "../routes";
 
 
 class BankIndex extends Component{
-    
+
+    static async getInitialProps() {
+        const bank = await factory.methods.getDeployedBank().call();
+        return {bank};
+    }
+
+    renderbanks() {
+        console.log(this.props.bank);
+        const item = this.props.bank.map(address => {
+            return {
+                header: address,
+                description:(
+                    <Link route={`/bank/loan/new`}>
+                    <a>View Bank</a>
+                    </Link>
+                ),
+                fluid: true
+            };
+        });
+        return <Card.Group items={item} />;
+    }
+
     render() {
         return (
         <Layout>
-            <Segment style={{ marginTop: '50px' }}>
-                <h2>Bank Loan System</h2>
-                <Divider section /> 
-                <div>
-                    <Link route='/bank/show/'>
-                        <a>
-                            <Button content='Send Money' primary/>
-                        </a>
-                    </Link>
-                    <Link route='/bank/new/'>   
-                        <a>         
-                            <Button content='Receive Money' receive style={{ marginLeft: '10px' }} secondry/>
-                        </a>    
-                    </Link>    
-                </div>
-            </Segment>
+            <div>
+            <h3>Open Bank </h3>
+            <Link route='/bank/loan/new'>
+                <a>
+                    <Button floated="right"
+                        content="View Loan"
+                        icon="add"
+                        primary
+                    />
+                </a>
+            </Link>
+            <Link route='/bank/new'>
+                <a>
+                    <Button floated="right"
+                        content="Create Bank"
+                        icon="add"
+                        primary
+                    />
+                </a>
+            </Link>
+            { this.renderbanks()  }
+            </div>            
         </Layout>
         );
     }
 }
+
 
 export default BankIndex;

@@ -1,6 +1,6 @@
 const HDWalletProvider = require('truffle-hdwallet-provider');
 const Web3 = require('web3');
-const compiledFactory = require('./build/Bank');
+const compiledBank = require('./build/BankFactory');
 
 
 const provider = new HDWalletProvider(
@@ -9,12 +9,11 @@ const provider = new HDWalletProvider(
 );
 
 const web3 = new Web3(provider);
-
 const deploy = async () => {
     const accounts = await web3.eth.getAccounts();
-    console.log("Atempting to deploy accounts{2}{2}", accounts[0]);
-    const result = await new web3.eth.Contract(JSON.parse(compiledFactory.interface))
-        .deploy({"data": compiledFactory.bytecode})
+    console.log("Atempting to deploy accounts", accounts[0]);
+    const result = await new web3.eth.Contract(JSON.parse(compiledBank.interface))
+        .deploy({"data": compiledBank.bytecode})
         .send({from: accounts[0], gas:2000000});
 
     console.log("Contract deployed to ", result.options.address);
