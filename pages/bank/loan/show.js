@@ -116,31 +116,21 @@ class BankShow extends Component{
     
     render() {
         return (
-                <Layout>
-                <Message
-                    header=' View'
-                    content='You can have a look into your  information'
-                />
-        <Grid>
-                <Grid.Row>
-                    <Grid.Column width={14}>
-                        {this.renderCard() }
-                    </Grid.Column>
-                    <Grid.Column width={6}>
-                    </Grid.Column>
-                </Grid.Row>
-                <Grid.Row>
-                    <Grid.Column>
-                    {/* <Link route = {`/campaigns/${this.props.address}/requests`} > */}
-                        {/* <a>
-                            <Button primary > View Requests </Button>
-                        </a> */}
-                    {/* </Link> */}
-                    </Grid.Column>
-                </Grid.Row>
-            </Grid>
-                </Layout>
-
+            <Layout>
+            <Message
+                header=' View'
+                content='You can have a look into your  information'
+            />
+                <Grid>
+                    <Grid.Row>
+                        <Grid.Column width={14}>
+                            {this.renderCard() }
+                        </Grid.Column>
+                        <Grid.Column width={6}>
+                        </Grid.Column>
+                    </Grid.Row>
+                </Grid>
+            </Layout>
         );
     }
 }

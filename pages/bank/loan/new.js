@@ -71,7 +71,7 @@ class BankNew extends Component {
             <MuiThemeProvider muiTheme={getMuiTheme(lightBaseTheme)}>
                 <Layout>
                     <Segment style={{ marginTop: '50px' }}>
-                        <h2>  System</h2>
+                        <h2>Bank Loan System</h2>
                         <Divider section /> 
                         <Form onSubmit={this.onSubmit} error={!!this.state.errorMessage} >
                             <Form.Field>  

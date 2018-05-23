@@ -18,7 +18,7 @@ class BankIndex extends Component{
                 header: address,
                 description:(
                     <Link route={`/bank/${address}/loan/new`}>
-                    <a>View Bank</a>
+                    <a>Request for Loan</a>
                     </Link>
                 ),
                 fluid: true
@@ -32,19 +32,10 @@ class BankIndex extends Component{
         <Layout>
             <div>
             <h3>Open Bank </h3>
-            <Link route='/bank/loan/new'>
-                <a>
-                    <Button floated="right"
-                        content="View Loan"
-                        icon="add"
-                        primary
-                    />
-                </a>
-            </Link>
             <Link route='/bank/new'>
                 <a>
                     <Button floated="right"
-                        content="Create Bank"
+                        content="Create Bank Account"
                         icon="add"
                         primary
                     />
