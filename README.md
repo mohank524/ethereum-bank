@@ -23,4 +23,4 @@ Run npm install --save next-routes
 
 Run testrpc in another terminal.
 
-Run npm run dev and go to locahost:8000.
+Run npm run dev and go to locahost:3000.
